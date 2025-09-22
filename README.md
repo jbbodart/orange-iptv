@@ -1,6 +1,6 @@
 # La TV d'Orange France sur UniFiOS
 
-Ces scripts permettent de configurer la TV d'Orange en France pour les clients ayant remplacé leur livebox par une gateway Unifi basée sur UnifiOS (Cloud Gateways (UCG-*), Gateways (UXG-*), Dream routers...).
+Ces scripts permettent de configurer la TV d'Orange en France pour les clients ayant remplacé leur livebox par une gateway Unifi basée sur UnifiOS (Cloud Gateways (UCG-XX), Gateways (UXG-XX), Dream routers (UDM-XX), etc...).
 
 Comme il est actuellement impossible de configurer via la GUI Unifi une interface WAN avec plusieurs VLAN, le script se charge de créer la nouvelle interface et de lancer le proxy IGMP afin de relayer les flux IPTV.
 
@@ -16,14 +16,14 @@ Testé sur Unifi Gateway Max v4.1.13 / Unifi Network v9.4.19, avec décodeur Ora
 
 2. (conseillé mais non obligatoire) Un VLAN dédié pour la TV dans votre réseau local.
 
-Cela permet d'appliquer la configuration particulière nécessaire au fonctionnement de la TV uniquement à votre décodeur (DNS, options DHCP...).
+Cela permet d'appliquer la configuration particulière nécessaire au fonctionnement de la TV uniquement à votre décodeur TV (DNS, options DHCP...).
 
 3. Configuration sur la GUI
 
 Dans le réseau sur lequel le décodeur TV est connecté, configurez les valeurs suivantes :
 
 * DHCP activé
-* DNS Server : configurez uniquement les DNS d'Orange : 80.10.246.136 et 81.253.149.6
+* DNS Server : configurez uniquement les DNS d'Orange : `80.10.246.136` et `81.253.149.6`
 
 Exemple :
 
@@ -31,19 +31,18 @@ Exemple :
 
 * Custom DHCP Options : Ajouter une option "vendor spécific" (code 125) avec une chaine hexadécimale de la forme :
 
-00:00:0d:e9:24:04:06:YY:YY:YY:YY:YY:YY:05:0f:XX:XX:XX:XX:XX:XX:XX:XX:XX:XX:XX:XX:XX:XX:XX:06:09:4c:69:76:65:62:6f:78:20:VV
+`00:00:0d:e9:24:04:06:YY:YY:YY:YY:YY:YY:05:0f:XX:XX:XX:XX:XX:XX:XX:XX:XX:XX:XX:XX:XX:XX:XX:06:09:4c:69:76:65:62:6f:78:20:VV`
 
 Avec :
-* YY:YY:YY:YY:YY:YY  // 3 premiers octets de l'adresse MAC de la livebox en hexa
-* XX:XX:XX:XX:XX:XX:XX:XX:XX:XX:XX:XX:XX:XX:XX:XX:XX:XX:XX  // le numéro de série de livebox codé en hexa.
-* VV  // version LIVEBOX codée en hexa (33 = V3, 34 = V4, etc.)
+* `YY:YY:YY:YY:YY:YY` : 3 premiers octets de l'adresse MAC de la livebox en hexa
+* `XX:XX:XX:XX:XX:XX:XX:XX:XX:XX:XX:XX:XX:XX:XX:XX:XX:XX:XX` : le numéro de série de livebox codé en hexa.
+* `VV` : version LIVEBOX codée en hexa (33 = V3, 34 = V4, etc.)
 
-Un script existe pour générer cette chaine : https://lafibre.info/remplacer-livebox/le-guide-complet-pour-usgusg-pro-internet-tv-livebox-ipv6/msg608516/#msg608516
+Un script existe pour générer cette chaine hexa : https://lafibre.info/remplacer-livebox/le-guide-complet-pour-usgusg-pro-internet-tv-livebox-ipv6/msg608516/#msg608516
 
 ![Screenshot GUI](https://raw.githubusercontent.com/jbbodart/orange-iptv/refs/heads/main/img/Configuration%20Option%20DHCP%202.jpg)
 
 Une fois cette configuration réalisée, le décodeur TV devrait pouvoir démarrer sans erreur (mais la TV live toujours inacessible).
-Dernière étape : activation de l'IPTV
 
 # Installation
 
@@ -56,7 +55,7 @@ cd /data
 curl -sL https://... | tar -xvz
 ```
 
-Ouvrir le script orange-iptvd, et configurer les valeurs correspondant à votre installation, en particulier :
+Ouvrir le script `orange-iptvd`, et configurer les valeurs correspondant à votre installation, en particulier :
 
 ```
 # Interface on which IPTV traffic enters the router (configure according to your Unifi device)```
