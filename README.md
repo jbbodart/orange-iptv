@@ -77,7 +77,7 @@ cd /data/orange-iptv
 
 # Verification
 
-Une fois le script lancé une inouvelle nterface `iptv` devrait avoir été crée, avec les bons paramètres de QoS :
+Une fois le script lancé une nouvelle interface `iptv` devrait avoir été crée, avec les bons paramètres de QoS :
 ```
 root@UXGMax:/data/orange-iptv# ip -d link show iptv
 XX: iptv@eth4: <BROADCAST,MULTICAST,UP,LOWER_UP> mtu 1500 qdisc noqueue state UP mode DEFAULT group default qlen 1000
