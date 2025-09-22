@@ -48,7 +48,7 @@ Une fois cette configuration réalisée, le décodeur TV devrait pouvoir démarr
 
 Il est nécessaire d'avoir un accès SSH sur la gateway.
 
-Télécharger le repository dans le répertoire `/data/orange-iptv` (le contenu de `/data` est conservé lors des reboots et des upgrades firmwares) :
+Sur la gateway, télécharger ce repository dans le répertoire `/data/orange-iptv` (le contenu de `/data` est conservé lors des reboots et des upgrades firmwares) :
 
 ```bash
 cd /data
@@ -59,7 +59,7 @@ mv orange-iptv-0.1 orange-iptv
 Ouvrir le script `orange-iptvd`, et configurer les valeurs correspondant à votre installation, en particulier :
 
 ```
-# Interface on which IPTV traffic enters the router (configure according to your Unifi device)```
+# Interface on which IPTV traffic enters the router (configure according to your Unifi device)
 IPTV_WAN_INTERFACE="eth4"
 # LAN interfaces on which IPTV should be made available (configure according to your home network)
 IPTV_LAN_INTERFACES="br102"
