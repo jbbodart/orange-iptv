@@ -27,7 +27,7 @@ Dans le réseau sur lequel le décodeur TV est connecté, configurez les valeurs
 
 Exemple :
 
-![Screenshot GUI](http://url/to/img.png)
+![Screenshot GUI](https://raw.githubusercontent.com/jbbodart/orange-iptv/refs/heads/main/img/Configuration%20r%C3%A9seau.png)
 
 * Custom DHCP Options : Ajouter une option "vendor spécific" (code 125) avec une chaine hexadécimale de la forme :
 
@@ -40,7 +40,7 @@ Avec :
 
 Un script existe pour générer cette chaine : https://lafibre.info/remplacer-livebox/le-guide-complet-pour-usgusg-pro-internet-tv-livebox-ipv6/msg608516/#msg608516
 
-![Screenshot GUI](http://url/to/img.png)
+![Screenshot GUI](https://raw.githubusercontent.com/jbbodart/orange-iptv/refs/heads/main/img/Configuration%20Option%20DHCP%202.jpg)
 
 Une fois cette configuration réalisée, le décodeur TV devrait pouvoir démarrer sans erreur (mais la TV live toujours inacessible).
 Dernière étape : activation de l'IPTV
