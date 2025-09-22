@@ -1,0 +1,140 @@
+#!/bin/sh
+# Script for managing the orange-iptv service
+#
+# Copyright (C) 2025 JBBD.
+# Based on udm-iptv (https://github.com/fabianishere/udm-iptv) by Fabian Mastenbroek.
+#
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 2 of the License, or
+# (at your option) any later version.
+
+## Configuration for orange-iptvd ##
+
+# User configuration :
+# Interface on which IPTV traffic enters the router (configure according to your Unifi device)
+IPTV_WAN_INTERFACE="eth4"
+# LAN interfaces on which IPTV should be made available (configure according to your home network)
+IPTV_LAN_INTERFACES="br102"
+# Enable debugging for improxy
+IPTV_IMPROXY_DEBUG="false"
+# Name of the IPTV VLAN interface (default : iptv)
+IPTV_WAN_VLAN_INTERFACE="iptv"
+
+# Orange France specific configuration :
+# ID of VLAN which carries IPTV traffic
+IPTV_WAN_VLAN="840"
+# Static IP for IPTV WAN interface
+IPTV_WAN_STATIC_IP="192.168.255.254/24"
+# IPTV VLAN interface egress-qos
+IPTV_WAN_VLAN_INTERFACE_EGRESS_QOS="0:5 1:5 2:5 3:5 4:5 5:5 6:5 7:5"
+
+###
+
+# Setup the network, creating the IPTV VLAN interface if necessary
+# and obtaining an IP address for the interface.
+_network_setup() {
+
+    # Check if WAN interface exists
+    if ! ip link show "$IPTV_WAN_INTERFACE" >/dev/null; then
+        echo "Device $IPTV_WAN_INTERFACE for $IPTV_WAN_VLAN_INTERFACE does not exist"
+        exit 1
+    fi
+
+    # Delete existing IPTV WAN VLAN interface
+    if [ -e /sys/class/net/"$IPTV_WAN_VLAN_INTERFACE" ]; then
+        echo "Device $IPTV_WAN_VLAN_INTERFACE already exists.. Deleting device"
+        ip link delete dev "$IPTV_WAN_VLAN_INTERFACE"
+    fi
+
+    # Create IPTV WAN interface
+    ip link add link "$IPTV_WAN_INTERFACE" name "$IPTV_WAN_VLAN_INTERFACE" type vlan id "$IPTV_WAN_VLAN"
+
+    # Set egress-qos
+    if [ -n "$IPTV_WAN_VLAN_INTERFACE_EGRESS_QOS" ]; then
+        ip link set "$IPTV_WAN_VLAN_INTERFACE" type vlan egress $IPTV_WAN_VLAN_INTERFACE_EGRESS_QOS
+    fi
+
+    # Bring VLAN interface up
+    ip link set dev "$IPTV_WAN_VLAN_INTERFACE" up
+
+    # Set static IP
+    if [ -n "$IPTV_WAN_STATIC_IP" ]; then
+        ip -4 addr change "$IPTV_WAN_STATIC_IP" dev "$IPTV_WAN_VLAN_INTERFACE"
+    fi
+
+}
+
+# Tear down the network configuration
+_network_teardown() {
+    ip link delete dev "$IPTV_WAN_VLAN_INTERFACE"
+}
+
+# Build the configuration needed by IMProxy
+_improxy_build_config() {
+    echo "# improxy configuration for orange-iptv"
+    echo "igmp enable version 2"
+    echo "mld disable"
+    echo "quickleave disable"
+    echo "upstream $IPTV_WAN_VLAN_INTERFACE"
+
+    # Configure the downstream interfaces
+    for path in /sys/class/net/*; do
+        interface=$(basename "$path")
+        if echo "$IPTV_LAN_INTERFACES" | grep -w -q "$interface"; then
+            echo "downstream $interface"
+        fi
+    done
+}
+
+# Configure IMProxy to bridge multicast traffic
+_improxy_setup() {
+    echo "Setting up IMProxy"
+    _improxy_build_config > /var/run/improxy.orange-iptv.conf
+
+}
+
+# Tear down the IGMP Proxy configuration
+_improxy_teardown() {
+    cat /var/run/improxy.orange-iptv.pid | xargs kill 
+    rm -f /var/run/improxy.orange-iptv.conf
+}
+
+# Start the igmpproxy service
+_improxy_start() {
+    echo "Starting IMProxy"
+    args=""
+    if [ -n "$PTV_IMPROXY_DEBUG" ] && [ "$PTV_IMPROXY_DEBUG" != "false" ]; then
+        args="-d 5"
+    fi
+
+    if ! command -v improxy > /dev/null 2>&1; then
+        echo "error: improxy not installed..."
+        exit 1
+    fi
+
+    # shellcheck disable=SC2086
+    exec improxy $args "$@" -c /var/run/improxy.orange-iptv.conf -p /var/run/improxy.orange-iptv.pid 
+}
+
+# Check if the user passed any argument
+if [ $# -eq 0 ]; then
+    exit 1
+fi
+
+case $1 in
+    start)
+        shift
+        _network_setup
+        _improxy_setup
+        _improxy_start "$@"
+        ;;
+    stop)
+        shift
+        _improxy_teardown
+        _network_teardown
+        ;;
+    *)
+        exit 1
+        ;;
+esac

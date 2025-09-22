@@ -1,0 +1,93 @@
+#!/bin/sh
+# Script for managing the orange-iptv installation.
+#
+# Copyright (C) 2025 JBBD.
+# Based on udm-iptv (https://github.com/fabianishere/udm-iptv) by Fabian Mastenbroek.
+#
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 2 of the License, or
+# (at your option) any later version.
+
+set -eu
+
+# Install orange-iptv
+orange_iptv_install()
+{
+    cp orange-iptvd /usr/local/bin/
+    chmod +x /usr/local/bin/orange-iptvd
+    cp orange-iptvd.service /lib/systemd/system
+    systemctl enable orange-iptvd
+    systemctl start orange-iptvd
+}
+
+
+# Remove the orange-iptv installation from the system
+orange_iptv_uninstall()
+{
+    systemctl stop orange-iptvd
+    systemctl disable orange-iptvd
+    rm -f /usr/local/bin/orange-iptvd
+    rm -f /lib/systemd/system/orange-iptvd.service
+}
+
+# Restart the orange-iptv daemon via systemd
+orange_iptv_restart()
+{
+    systemctl restart orange-iptvd
+}
+
+# Stop the orange-iptv daemon via systemd
+orange_iptv_stop()
+{
+    systemctl stop orange-iptvd
+}
+
+# Print the help message of this program.
+orange_iptv_usage()
+{
+	cat << EOF
+Usage: $0 [OPTIONS...] COMMAND [ARGS]...
+Helper tool for Orange IPTV on UniFi.
+Commands:
+  install           Install orange-iptvd
+  uninstall         Remove orange-iptvd from the system
+  restart           Restart the orange-iptvd daemon
+  stop              Stop the orange-iptvd daemon
+Options:
+  -h, --help    Show this message and exit
+EOF
+}
+
+# Check if the user passed any argument
+if [ $# -eq 0 ]; then
+    orange_iptv_usage
+    exit 1
+fi
+
+case $1 in
+    -h|--help)
+        orange_iptv_usage
+        exit 0
+        ;;
+    install)
+        shift
+        orange_iptv_install "$@"
+        ;;
+    uninstall)
+        shift
+        orange_iptv_uninstall "$@"
+        ;;
+    restart)
+        shift
+        orange_iptv_restart "$@"
+        ;;
+    stop)
+        shift
+        orange_iptv_stop "$@"
+        ;;
+    *)
+        orange_iptv_usage
+        exit 1
+        ;;
+esac
