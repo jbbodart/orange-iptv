@@ -52,7 +52,7 @@ Télécharger le repository dans le répertoire `/data/orange-iptv` (le contenu 
 
 ```bash
 cd /data
-curl -sL https://... | tar -xvz
+curl -sL https://github.com/jbbodart/orange-iptv/archive/refs/tags/v0.1.tar.gz | tar -xvz
 ```
 
 Ouvrir le script `orange-iptvd`, et configurer les valeurs correspondant à votre installation, en particulier :
